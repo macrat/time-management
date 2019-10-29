@@ -43,6 +43,7 @@ import DeltaCell from '~/components/DeltaCell';
 
 
 export default {
+    middleware: 'LoginRequired',
     components: {TimeCell, DeltaCell},
 }
 </script>

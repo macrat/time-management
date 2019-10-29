@@ -46,6 +46,7 @@ time {
 import RecordButton from '~/components/RecordButton';
 
 export default {
+    middleware: 'LoginRequired',
     components: {RecordButton},
     data: () => ({
         currentTime: "----/--/-- --:--:--",
