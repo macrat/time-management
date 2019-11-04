@@ -1,6 +1,6 @@
 <style scoped>
 button {
-    border: 0;
+    border: none;
     background-color: white;
     box-shadow: 2px 2px 2px gray;
     display: flex;

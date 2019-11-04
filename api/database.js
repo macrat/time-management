@@ -51,7 +51,7 @@ export default class {
         try {
             await this.run('INSERT INTO users VALUES (?, ?, ?)', id, hash, solt);
         } catch(err) {
-            throw 'something wrong';
+            throw 'user ID already exists';
         }
     }
 

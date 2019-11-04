@@ -46,6 +46,10 @@ export const mutations = {
         state.token = token;
         this.$cookies.set('token', token);
     },
+    LogOut(state) {
+        state.token = null;
+        this.$cookies.remove('token');
+    },
     StartWork(state) {
         const timestamp = new Date();
         state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].workStart = timestamp;
