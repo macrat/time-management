@@ -49,8 +49,18 @@ export default {
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1,
     }),
-    mounted() {
-        this.$store.dispatch('Sync', {year: this.year, month: this.month});
+    watch: {
+        year() {
+            this.sync();
+        },
+        month() {
+            this.sync();
+        },
+    },
+    methods: {
+        async sync() {
+            await this.$store.dispatch('Sync', {year: this.year, month: this.month});
+        },
     },
 }
 </script>

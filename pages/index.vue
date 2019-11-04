@@ -57,6 +57,7 @@ export default {
     methods: {
         loggedin(token) {
             this.$store.commit('LoggedIn', token);
+            this.$store.dispatch('Sync');
             this.$router.push('/recorder');
         },
         errored(err) {

@@ -74,14 +74,14 @@ export const actions = {
             commit('LoggedIn', token);
         }
         setTimeout(() => {
-            dispatch('Sync', {
-                year: new Date().getFullYear(),
-                month: new Date().getMonth() + 1,
-            });
+            dispatch('Sync');
         }, 200);
     },
-    async Sync({commit}, {year, month}) {
-        commit('Update', await this.$api.getAttends(year, month));
+    async Sync({commit}, target) {
+        commit('Update', await this.$api.getAttends(
+            target && target.year || new Date().getFullYear(),
+            target && target.month || new Date().getMonth() + 1,
+        ));
     },
     async StartWork({commit}) {
         commit('StartedWork', await this.$api.startWork());
