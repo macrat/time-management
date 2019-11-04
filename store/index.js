@@ -19,9 +19,9 @@ export const state = () => {
 
     state.records[keyOfMonth(new Date())] = [...new Array(daysOfMonth(new Date()))].map(() => ({
         workStart: null,
-        restStart: null,
-        restEnd: null,
         workEnd: null,
+        breakStart: null,
+        breakEnd: null,
     }));
 
     return state;
@@ -50,30 +50,49 @@ export const mutations = {
         state.token = null;
         this.$cookies.remove('token');
     },
-    StartWork(state) {
-        const timestamp = new Date();
+    Update(state, {year, month, attends}) {
+        state.records[`${year}/${month}`] = attends;
+    },
+    StartedWork(state, timestamp) {
         state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].workStart = timestamp;
     },
-    EndWork(state) {
-        const timestamp = new Date();
+    EndedWork(state, timestamp) {
         state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].workEnd = timestamp;
     },
-    StartRest(state) {
-        const timestamp = new Date();
-        state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].restStart = timestamp;
+    StartedBreak(state, timestamp) {
+        state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].breakStart = timestamp;
     },
-    EndRest(state) {
-        const timestamp = new Date();
-        state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].restEnd = timestamp;
+    EndedBreak(state, timestamp) {
+        state.records[keyOfMonth(timestamp)][timestamp.getDate() - 1].breakEnd = timestamp;
     },
 };
 
-
 export const actions = {
-    async nuxtClientInit({commit}) {
+    async nuxtClientInit({commit, dispatch}) {
         const token = this.$cookies.get('token');
         if (token) {
             commit('LoggedIn', token);
         }
+        setTimeout(() => {
+            dispatch('Sync', {
+                year: new Date().getFullYear(),
+                month: new Date().getMonth() + 1,
+            });
+        }, 200);
+    },
+    async Sync({commit}, {year, month}) {
+        commit('Update', await this.$api.getAttends(year, month));
+    },
+    async StartWork({commit}) {
+        commit('StartedWork', await this.$api.startWork());
+    },
+    async EndWork({commit}) {
+        commit('EndedWork', await this.$api.endWork());
+    },
+    async StartBreak({commit}) {
+        commit('StartedBreak', await this.$api.startBreak());
+    },
+    async EndBreak({commit}) {
+        commit('EndedBreak', await this.$api.endBreak());
     },
 }

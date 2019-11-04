@@ -6,17 +6,23 @@ export default class {
     constructor(path) {
         this.db = new sqlite3.Database(path);
 
+        this.run(`PRAGMA foreign_keys=true`);
         this.run(`CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             hash TEXT NOT NULL,
             solt TEXT NOT NULL
         )`);
         this.run(`CREATE TABLE IF NOT EXISTS attends (
-            user TEXT,
+            user TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            month INTEGER NOT NULL,
+            day INTEGER NOT NULL,
             work_start TIMESTAMP,
             work_end TIMESTAMP,
-            rest_start TIMESTAMP,
-            rest_end TIMESTAMP
+            break_start TIMESTAMP,
+            break_end TIMESTAMP,
+            PRIMARY KEY (user, year, month, day),
+            FOREIGN KEY (user) REFERENCES users(id)
         )`);
     }
 
@@ -34,6 +40,17 @@ export default class {
     get(sql, ...params) {
         return new Promise((resolve, reject) => {
             this.db.get(sql, ...params, (err, result) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(result);
+            });
+        });
+    }
+
+    getAll(sql, ...params) {
+        return new Promise((resolve, reject) => {
+            this.db.all(sql, ...params, (err, result) => {
                 if (err) {
                     reject(err);
                 }
@@ -71,5 +88,50 @@ export default class {
         } catch(err) {
             throw 'something wrong';
         }
+    }
+
+    async getAttends(id, year, month) {
+        const data = await this.getAll('SELECT day, work_start, work_end, break_start, break_end FROM attends WHERE user = ? AND year = ? AND month = ?', id, year, month);
+
+        const lastDate = new Date(year, month, -1).getDate();
+        const result = [];
+
+        for (let day=1; day<=lastDate; day++) {
+            const match = data.filter(d => d.day === day);
+
+            if (match && match.length > 0) {
+                result.push(match[0]);
+            } else {
+                result.push({
+                    day: day,
+                    work_start: null,
+                    work_end: null,
+                    break_start: null,
+                    break_end: null,
+                });
+            }
+        }
+
+        return result;
+    }
+
+    async startWork(id, timestamp) {
+        await this.run('INSERT OR IGNORE INTO attends (user, year, month, day) VALUES (?, ?, ?, ?)', id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+        await this.run('UPDATE attends SET work_start = ? WHERE user = ? AND year = ? AND month = ? AND day = ?', timestamp, id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+    }
+
+    async endWork(id, timestamp) {
+        await this.run('INSERT OR IGNORE INTO attends (user, year, month, day) VALUES (?, ?, ?, ?)', id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+        await this.run('UPDATE attends SET work_end = ? WHERE user = ? AND year = ? AND month = ? AND day = ?', timestamp, id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+    }
+
+    async startBreak(id, timestamp) {
+        await this.run('INSERT OR IGNORE INTO attends (user, year, month, day) VALUES (?, ?, ?, ?)', id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+        await this.run('UPDATE attends SET break_start = ? WHERE user = ? AND year = ? AND month = ? AND day = ?', timestamp, id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+    }
+
+    async endBreak(id, timestamp) {
+        await this.run('INSERT OR IGNORE INTO attends (user, year, month, day) VALUES (?, ?, ?, ?)', id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
+        await this.run('UPDATE attends SET break_end = ? WHERE user = ? AND year = ? AND month = ? AND day = ?', timestamp, id, timestamp.getFullYear(), timestamp.getMonth() + 1, timestamp.getDate());
     }
 }

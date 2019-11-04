@@ -17,7 +17,7 @@ th {
 
 <template>
     <div>
-        <h1>{{ new Date().getFullYear() }}年{{ new Date().getMonth() + 1 }}月の勤怠</h1>
+        <h1>{{ year }}年{{ month }}月の勤怠</h1>
         <table>
             <thead>
                 <tr><th rowspan=2>日付</th><th colspan=2>勤務</th><th colspan=2>休憩</th><th rowspan=2>勤務時間</th></tr>
@@ -28,9 +28,9 @@ th {
                     <th>{{ day + 1 }}</th>
                     <time-cell :value=time.workStart />
                     <time-cell :value=time.workEnd />
-                    <time-cell :value=time.restStart />
-                    <time-cell :value=time.restEnd />
-                    <delta-cell :value="time.workEnd - time.workStart - (time.restEnd - time.restStart)" />
+                    <time-cell :value=time.breakStart />
+                    <time-cell :value=time.breakEnd />
+                    <delta-cell :value="time.workEnd - time.workStart - (time.breakEnd - time.breakStart)" />
                 </tr>
             </tbody>
         </table>
@@ -45,5 +45,12 @@ import DeltaCell from '~/components/DeltaCell';
 export default {
     middleware: 'LoginRequired',
     components: {TimeCell, DeltaCell},
+    data: () => ({
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+    }),
+    mounted() {
+        this.$store.dispatch('Sync', {year: this.year, month: this.month});
+    },
 }
 </script>

@@ -32,12 +32,12 @@ time {
     <div class=wrapper>
         <time>{{ currentTime }}</time>
         <div class=buttons>
-            <record-button class=big-button :disabled="today.workStart !== null" @click="$store.commit('StartWork')">出勤</record-button>
+            <record-button class=big-button :disabled="today.workStart !== null" @click="$store.dispatch('StartWork')">出勤</record-button>
             <div>
-                <record-button class=small-button :disabled="today.restStart !== null" @click="$store.commit('StartRest')">休憩開始</record-button>
-                <record-button class=small-button :disabled="today.restEnd !== null" @click="$store.commit('EndRest')">休憩終了</record-button>
+                <record-button class=small-button :disabled="today.breakStart !== null" @click="$store.dispatch('StartBreak')">休憩開始</record-button>
+                <record-button class=small-button :disabled="today.breakEnd !== null" @click="$store.dispatch('EndBreak')">休憩終了</record-button>
             </div>
-            <record-button class=big-button :disabled="today.workEnd !== null" @click="$store.commit('EndWork')">退勤</record-button>
+            <record-button class=big-button :disabled="today.workEnd !== null" @click="$store.dispatch('EndWork')">退勤</record-button>
         </div>
     </div>
 </template>

@@ -19,13 +19,13 @@ input {
     box-shadow: 2px 2px 2px lightgray inset;
     padding: 4px 8px;
 }
-button, input[type=submit] {
+button {
     border: none;
     background-color: white;
     box-shadow: 2px 2px 2px gray;
     padding: 8px 32px;
 }
-button:active, input[type=submit]:active {
+button:active {
     box-shadow: 3px 3px 2px gray;
 }
 </style>
@@ -36,16 +36,13 @@ button:active, input[type=submit]:active {
         <input v-model=id placeholder="Your ID" required />
         <input type=password v-model=password placeholder="Password" required />
         <span>
-            <button @click.prevent=signup>signup</button>
-            <input type=submit value=login />
+            <button type=button @click.prevent=signup>signup</button>
+            <button type=submit>login</button>
         </span>
     </form>
 </template>
 
 <script>
-import axios from 'axios';
-
-
 export default {
     data: () => ({
         id: '',
@@ -63,27 +60,23 @@ export default {
             this.$router.push('/recorder');
         },
         errored(err) {
-            console.error(err.response);
-            this.error = err.response.data.message;
+            if (err.response) {
+                console.error(err.response);
+                this.error = err.response.data.message;
+            } else {
+                throw err;
+            }
         },
         async signup() {
             try {
-                const resp = await axios.post('/api/signup', {
-                    id: this.id,
-                    password: this.password,
-                });
-                this.loggedin(resp.data.token);
+                this.loggedin(await this.$api.signup(this.id, this.password));
             } catch(err) {
                 this.errored(err);
             }
         },
         async login() {
             try {
-                const resp = await axios.post('/api/signin', {
-                    id: this.id,
-                    password: this.password,
-                });
-                this.loggedin(resp.data.token);
+                this.loggedin(await this.$api.signin(this.id, this.password));
             } catch(err) {
                 this.errored(err);
             }

@@ -83,7 +83,7 @@ app.post('/signin', async (req, res) => {
 app.use(async (req, res, next) => {
     try {
         const token = req.headers['authorization'].slice('Bearer '.length);
-        req.userInfo = await decodeToken(token);
+        req.userID = await decodeToken(token);
     } catch (err) {
         return res.status(403).send({
             message: 'login required',
@@ -93,7 +93,37 @@ app.use(async (req, res, next) => {
 });
 
 
-app.get('/test', (req, res) => res.send({message: 'hello'}));
+app.get('/attends/:year(\\d{4})/:month(\\d{1,2})', async (req, res) => {
+    return res.json({
+        attends: await db.getAttends(req.userID, parseInt(req.params.year), parseInt(req.params.month)),
+    });
+});
+
+
+function timestampHandler(dbFunc) {
+    return async (req, res) => {
+        try {
+            const timestamp = new Date();
+            await dbFunc(req.userID, timestamp);
+
+            return res.json({
+                timestamp: timestamp,
+            });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send({
+                message: 'something wrong',
+                timestamp: null,
+            });
+        }
+    };
+}
+
+
+app.get('/attends/work/start', timestampHandler(db.startWork.bind(db)));
+app.get('/attends/work/end', timestampHandler(db.endWork.bind(db)));
+app.get('/attends/break/start', timestampHandler(db.startBreak.bind(db)));
+app.get('/attends/break/end', timestampHandler(db.endBreak.bind(db)));
 
 
 export default {

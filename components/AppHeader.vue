@@ -2,10 +2,9 @@
 header {
     position: relative;
 }
-nav, .user-info {
+.user-info {
     position: absolute;
     top: 0;
-    left: 0;
     right: 0;
 }
 nav {
