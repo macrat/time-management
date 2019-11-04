@@ -1,13 +1,14 @@
 import bodyParser from 'body-parser';
 import express from 'express'
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 import Database from './database';
 
 
 const db = new Database('db.sqlite3');
 const app = express();
-app.set('secret_key', process.env.SECRET_KEY);
+app.set('secret_key', process.env.SECRET_KEY || `${crypto.randomBytes(16)}`);
 app.use(bodyParser.json({type: '*/*'}))
 
 
